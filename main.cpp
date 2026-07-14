@@ -82,6 +82,9 @@ int main() {
         std::cout << ">>> ";
         std::getline(std::cin, content);
         token_num = content.size();
+        if(content == "exit"){
+            exit(0);
+        }
         interpret(content);
     }
 
