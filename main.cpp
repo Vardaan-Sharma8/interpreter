@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cmath>
 
 #define LOG(x) std::cout << x << std::endl;
 
@@ -22,10 +23,25 @@ const std::string OP_TYPE = "Operator";
 int current_pos_str = 0;
 int current_pos_arr = 0;
 Token token_arr[1000];
+char op;
 int token_num;
+int number[2] = {0, 0};
 
 bool is_digit(char& c){
     return (c >= '0' && c <= '9');
+}
+
+int create_number(int pos, Token& current_token){
+    int temp;
+    int c = 0;
+    for(int x = 0; x < pos; x++){
+        current_token.num_value = current_token.num_value * (std::pow(10, (pos - x)));
+        number[c] += current_token.num_value;
+    }
+    temp = number[c];
+    c++;
+    op = token_arr[pos + 1].op_value;
+    return temp;
 }
 
 void get_next_token(std::string content){
@@ -59,11 +75,16 @@ std::string get_token_type(int& type){
     }
 }
 
-void parser(int type){
-    std::string type_str = get_token_type(type);
-    if(token_arr[current_pos_arr].type != type){
-        std::cout << "Syntax Error : Expected " << type_str << " instead got " << token_arr[current_pos_arr].type_str << std::endl;
-        exit(0);
+void parser(){
+    int ptr_pos = 0;
+    int op_pos;
+    Token current_token;
+    for(ptr_pos = 0; ptr_pos < token_num; ptr_pos++){
+        current_token = token_arr[ptr_pos];
+        if(current_token.type == OPERATOR){
+            op_pos = ptr_pos;
+            create_number(op_pos, token_arr[ptr_pos - 1]);
+        }
     }
 }
 
@@ -72,6 +93,12 @@ void interpret(std::string& content){
         get_next_token(content);
         current_pos_arr++;
     }
+    
+    if(token_arr[0].type != INT){
+        std::cout << "Syntax Error : Input starts with wrong type"; //Add more information in this error message!
+        exit(0);
+    }    
+
 }
 
 int main() {
