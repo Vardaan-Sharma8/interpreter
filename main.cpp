@@ -11,11 +11,20 @@ enum TokenType{
 
 //Objects of this structure will be the indivisual characters in the user input
 struct Token{
+public:
     int type;
     char op_value;
     int num_value;
-    std::string type_str;
+    std::string type_str;  
 };
+
+void set_value(int a_type, char a_op_value, int a_num_value, const std::string& a_type_str){
+    current_token.type = a_type;
+    current_token.op_value = a_op_value;
+    current_token.num_value = a_num_value;
+    current_token.type_str = a_type_str;
+}
+
 const std::string INT_TYPE = "Integer";
 const std::string OP_TYPE = "Operator";
 
@@ -44,14 +53,10 @@ void get_next_token(std::string content){
     }
 
     if (is_digit(c)){
-        current_token.type = INT;
-        current_token.num_value = c - '0';
-        current_token.type_str = INT_TYPE;
+        set_value(INT, '_', (c - '0'), INT_TYPE);
     }
     else{
-        current_token.type = OPERATOR;
-        current_token.op_value = c;
-        current_token.type_str = OP_TYPE;
+        set_value(OPERATOR, c, 0, OP_TYPE);
     }
     current_pos++;
 }
