@@ -18,22 +18,21 @@ public:
     std::string type_str;  
 };
 
+const std::string INT_TYPE = "Integer";
+const std::string OP_TYPE = "Operator";
+
+Token current_token;
+int current_pos = 0;
+int operand;
+char op;
+int result;
+
 void set_value(int a_type, char a_op_value, int a_num_value, const std::string& a_type_str){
     current_token.type = a_type;
     current_token.op_value = a_op_value;
     current_token.num_value = a_num_value;
     current_token.type_str = a_type_str;
 }
-
-const std::string INT_TYPE = "Integer";
-const std::string OP_TYPE = "Operator";
-
-Token current_token;
-int current_pos = 0;
-int left;
-int right;
-char op;
-int result;
 
 bool is_digit(char& c){
     return (c >= '0' && c <= '9');
@@ -53,12 +52,19 @@ void get_next_token(std::string content){
     }
 
     if (is_digit(c)){
-        set_value(INT, '_', (c - '0'), INT_TYPE);
+        int current_num = c - '0';
+        current_pos++;
+        while(is_digit(content[current_pos])){
+            current_num = (current_num * 10) + (content[current_pos] - '0');
+            current_pos++;
+        }
+
+        set_value(INT, '_', current_num, INT_TYPE);
     }
     else{
         set_value(OPERATOR, c, 0, OP_TYPE);
+        current_pos++;
     }
-    current_pos++;
 }
 
 std::string get_token_type(int& type){
@@ -73,10 +79,10 @@ std::string get_token_type(int& type){
 
 void eval(){
     if(op == '+'){
-        result = right + left;
+        result += operand;
     }
     else if (op == '-'){
-        result = left - right;
+        result -= operand;
     }
     else{
         std::cout << "Error during evaluation. Invail operator input." << std::endl;
@@ -94,18 +100,21 @@ void parser(int type){
 void interpret(std::string& content){
     get_next_token(content);
     parser(INT);
-    left = current_token.num_value;
+    result = current_token.num_value;
 
-    get_next_token(content);
-    parser(OPERATOR);
-    op = current_token.op_value;
+    int str_len = content.length();
 
-    get_next_token(content);
-    parser(INT);
-    right = current_token.num_value;
-    current_pos = 0;
+    while(current_pos < str_len){
+        get_next_token(content);
+        parser(OPERATOR);
+        op = current_token.op_value;
 
-    eval();
+        get_next_token(content);
+        parser(INT);
+        operand = current_token.num_value;
+
+        eval();        
+    }
 
 }
 
@@ -114,6 +123,7 @@ int main() {
     std::string content;
 
     while(true){
+        current_pos = 0;
         LOG(">>> ");
         std::getline(std::cin, content);
         if(content == "exit"){
