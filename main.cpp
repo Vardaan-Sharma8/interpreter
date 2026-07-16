@@ -21,15 +21,28 @@ const std::string OP_TYPE = "Operator";
 
 Token current_token;
 int current_pos = 0;
+int left;
+int right;
+char op;
+int result;
 
 bool is_digit(char& c){
     return (c >= '0' && c <= '9');
 }
 
+bool is_whitespace(char& c){
+    return (c == ' ');
+}
+
 void get_next_token(std::string content){
     char c;
     c = content[current_pos];
-        
+    
+    while(is_whitespace(c)){
+        current_pos++;
+        c = content[current_pos];
+    }
+
     if (is_digit(c)){
         current_token.type = INT;
         current_token.num_value = c - '0';
@@ -40,6 +53,7 @@ void get_next_token(std::string content){
         current_token.op_value = c;
         current_token.type_str = OP_TYPE;
     }
+    current_pos++;
 }
 
 std::string get_token_type(int& type){
@@ -52,6 +66,18 @@ std::string get_token_type(int& type){
     return "Error";
 }
 
+void eval(){
+    if(op == '+'){
+        result = right + left;
+    }
+    else if (op == '-'){
+        result = left - right;
+    }
+    else{
+        std::cout << "Error during evaluation. Invail operator input." << std::endl;
+    }
+}
+
 void parser(int type){
     std::string type_str = get_token_type(type);
     if(current_token.type != type){
@@ -61,8 +87,21 @@ void parser(int type){
 }
 
 void interpret(std::string& content){
-    get_next_token(content); //expected to be integer
+    get_next_token(content);
     parser(INT);
+    left = current_token.num_value;
+
+    get_next_token(content);
+    parser(OPERATOR);
+    op = current_token.op_value;
+
+    get_next_token(content);
+    parser(INT);
+    right = current_token.num_value;
+    current_pos = 0;
+
+    eval();
+
 }
 
 int main() {
@@ -72,7 +111,11 @@ int main() {
     while(true){
         LOG(">>> ");
         std::getline(std::cin, content);
+        if(content == "exit"){
+            exit(0);
+        }
         interpret(content);
+        std::cout << result << std::endl;
     }
 
     return 0;
