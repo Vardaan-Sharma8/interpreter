@@ -95,13 +95,14 @@ void get_next_token(std::string& content){
         }
         set_token_value(INT, INT_TYPE, current_num);
     }
-    else if(c == 34){
+    else if(c == '\"'){
         std::string current_str = "";
         current_pos++;
-        while(c != 34){
+        c = content[current_pos];
+        while(c != '\"'){
+            current_str += c;
             current_pos++;
             c = content[current_pos];
-            current_str += c;
         }
         set_token_value(STRING, STR_TYPE, current_str);
     }
@@ -112,11 +113,9 @@ void get_next_token(std::string& content){
         set_token_value(CURLY_CLOSE, CURLY_CLOSE_TYPE, "_");
     }
     else if(c == ':'){
-        is_key = false;
         set_token_value(COLON, COLON_TYPE, "_");
     }
     else if(c == ','){
-        is_key = true;
         set_token_value(COMMA, COMMA_TYPE, "_");
     }
     current_pos++;
@@ -131,14 +130,14 @@ void parser(int type){
 }
 
 void set_key(){
-    if(!(current_token.type == COMMA || current_token.type == COLON)){
+    if(!(current_token.char_val == "_")){
     Keys[key_pos] = current_token.char_val;
     key_pos++;
     }
 }
 
 void set_value(){
-    if(!(current_token.type == COMMA || current_token.type == COLON)){
+    if(!(current_token.char_val == "_")){
         Value[value_pos] = current_token.char_val;
         value_pos++;
     }
@@ -155,6 +154,13 @@ bool interpret(std::string& content){
         if(current_token.type == CURLY_CLOSE){
             std::cout << "JSON parsing completed" << std:: endl;
             break;
+        }
+
+        if(current_token.type == COMMA){
+            is_key = true;
+        }
+        else if (current_token.type == COLON){
+            is_key = false;
         }
 
         if(is_key){
@@ -202,7 +208,7 @@ int main(){
     if(is_interpreter_done){
         std::cout << "What \'Key\' do you want to get the value of? : ";
         std::cin >> get_key;
-        std::cout << "\n" <<  get(get_key, content) << std::endl;
+        std::cout <<  get(get_key, content) << std::endl;
     }
 
     return 0;
